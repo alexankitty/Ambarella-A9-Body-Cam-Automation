@@ -14,7 +14,6 @@ def connect():
     # was it found?
     if dev is None:
         raise ValueError('Device not found')
-    print(dev)
     # set the active configuration. With no arguments, the first
     # configuration will be the active one
     dev.set_configuration()
@@ -32,6 +31,7 @@ def connect():
             usb.util.ENDPOINT_OUT)
 
     assert ep is not None
+    print("Connection succeeded.")
     return dev #give us our device instance
 
 # Check password and log in. Params: dev: deviceInstance pw: string
@@ -44,6 +44,7 @@ def login(dev, pw):
     if ret[2] != 1:
         raise ValueError("Password Incorrect, exiting.")
     else:
+        print("Login successful.")
         return True
 
 # Enables USB mode on the body cam Params: dev: deviceInstance
@@ -53,6 +54,7 @@ def enableDiskMode(dev):
 
     dev.ctrl_transfer(usbOut, 80, 0x0080, 0, usbPacket)#Enter USB Mode
     ret = dev.ctrl_transfer(usbIn, 85, 0x0080, 0, packetLen)
+    print("Disk mode enabled, enjoy :)")
 
 #read pw from file
 f = open("pw", "r")
