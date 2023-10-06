@@ -7,32 +7,37 @@ packetLen = 10
 usbIn = 0xc0
 usbOut = 0x40
 
-def connect():
+def connectAll():
     # find our device
-    dev = usb.core.find(idVendor=0x4255, idProduct=0x0001)
+    devGen = usb.core.find(idVendor=0x4255, idProduct=0x0001, find_all=True)
 
     # was it found?
-    if dev is None:
+    if devGen is None:
         raise ValueError('Device not found')
     # set the active configuration. With no arguments, the first
     # configuration will be the active one
-    dev.set_configuration()
+    x = 0
+    devList = [None] * 0
+    for dev in devGen:
+        x += 1
+        dev.set_configuration()
 
-    # get an endpoint instance
-    cfg = dev.get_active_configuration()
-    intf = cfg[(0,0)]
+        # get an endpoint instance
+        cfg = dev.get_active_configuration()
+        intf = cfg[(0,0)]
 
-    ep = usb.util.find_descriptor(
-        intf,
-        # match the first OUT endpoint
-        custom_match = \
-        lambda e: \
-            usb.util.endpoint_direction(e.bEndpointAddress) == \
-            usb.util.ENDPOINT_OUT)
+        ep = usb.util.find_descriptor(
+            intf,
+            # match the first OUT endpoint
+            custom_match = \
+            lambda e: \
+                usb.util.endpoint_direction(e.bEndpointAddress) == \
+                usb.util.ENDPOINT_OUT)
 
-    assert ep is not None
-    print("Connection succeeded.")
-    return dev #give us our device instance
+        assert ep is not None
+        devList.append(dev)
+    print(f"Connection succeeded. {x} device{'s were' if x > 1 else ' was'} connected.")
+    return devList #give us our device iterator instance
 
 # Check password and log in. Params: dev: deviceInstance pw: string
 def login(dev, pw):
@@ -60,9 +65,9 @@ def enableDiskMode(dev):
 f = open("pw", "r")
 pw = f.read().strip()
 f.close()
-print(pw)
-dev = connect()
-if login(dev, pw):
-    enableDiskMode(dev)
+devList = connectAll()
+for dev in devList:
+    if login(dev, pw):
+        enableDiskMode(dev)
 
 
