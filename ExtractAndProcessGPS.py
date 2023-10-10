@@ -3,10 +3,8 @@ import json
 import pprint
 import argparse
 
-import googlemaps
 from datetime import datetime
 from geopy.geocoders import GoogleV3
-
 
 #read apikey from file
 f = open("googleApiKey", "r")
@@ -62,7 +60,7 @@ found = False
 for data in gpsArray:
     if data['latitude'] or data['longitude']:
         found = True
-        location = geolocator.reverse("22.5757344, 88.4048656")
+        location = geolocator.reverse(data['geoCoords'])
         print(location[0].address)
         break
 

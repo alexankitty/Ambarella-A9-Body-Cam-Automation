@@ -91,11 +91,16 @@ do
                 echo "Copying $month/$day/$year."
                 for video in $folder/*
                 do
-                    echo $video
-                    location=$(python ExtractAndProcessGPS.py $video)
                     videoname=$(basename $video)
-                    time=$(echo $video | cut -c 21-26)
-                    cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time-$location"
+                    extension="${video##*.}"
+                    time=$(echo $videoname | cut -c 21-26)
+                    if [ "$extension" == "MP4" ]; then
+                        location=$(python ExtractAndProcessGPS.py $video)
+                        echo $location
+                        cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time $location.$extension"
+                    else
+                        cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time.$extension"
+                    fi
                 done
             done
         else
