@@ -36,7 +36,7 @@ def connectAll():
 
         assert ep is not None
         devList.append(dev)
-    print(f"Connection succeeded. {x} device{'s were' if x > 1 else ' was'} connected.")
+    print(f"Connection succeeded. {x} device{'s were' if not x == 1 else ' was'} connected.")
     return devList #give us our device iterator instance
 
 # Check password and log in. Params: dev: deviceInstance pw: string

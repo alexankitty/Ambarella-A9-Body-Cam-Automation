@@ -96,6 +96,7 @@ do
                     time=$(echo $videoname | cut -c 21-26)
                     if [ "$extension" == "MP4" ]; then
                         location=$(python ExtractAndProcessGPS.py $video)
+                        location=$(echo $location | cut -c -20) #Truncate to 20 chars
                         echo $location
                         cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time $location.$extension"
                     else
