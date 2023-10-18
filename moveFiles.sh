@@ -114,6 +114,8 @@ do
             done
             if [ $dryrun = false -a $success = true ]; then
                 rm -rf $mountPath/DCIM/*
+            else
+                echo "Not all files copied successfully or this is a dry run, skipping removal"
             fi
         else
             echo "No files to copy from $blk, continuing."
