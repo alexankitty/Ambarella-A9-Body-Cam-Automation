@@ -4,6 +4,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 mountPath=
 fileServerMount=
 serverHost=
+dryrun=true
 
 is_mounted() {
     findmnt --source "$1" > "/dev/null"
@@ -63,11 +64,12 @@ for blk in /dev/sd*1
 do
     if ! is_mounted $blk; then
         usbPath=$(udevadm info -q path -n $blk | cut -d'/' -f7)
+        success=true
         mount $blk $mountPath
         if [ -d "$mountPath/DCIM" ]; then
             #Get Officer name
             fileCheck=(mount/DCIM/*/*)
-            name=$(basename $fileCheck | cut -d_ -f1)
+            name=$(basename $fileCheck | cut -d2 -f1 | tr --delete 0_)
             if [ ! -d "$fileServerMount/$name" ]; then
                 mkdir $fileServerMount/$name
             fi
@@ -99,11 +101,20 @@ do
                         location=$(echo $location | cut -c -20) #Truncate to 20 chars
                         echo $location
                         cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time $location.$extension"
+                        if [ $? -ne 0 ]; then
+                            success=false
+                        fi
                     else
                         cp_p "$video" "$fileServerMount/$name/20$year/$month/$day/$time.$extension"
+                        if [ $? -ne 0 ]; then
+                            success=false
+                        fi
                     fi
                 done
             done
+            if [ $dryrun = false -a $success = true ]; then
+                rm -rf $mountPath/DCIM/*
+            fi
         else
             echo "No files to copy from $blk, continuing."
         fi
