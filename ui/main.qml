@@ -1,9 +1,15 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick 2.12
 import QtQuick.Layouts 1.15
+import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Controls.Material 2.12
 
 ApplicationWindow {
     //Properties
+    Material.theme: Material.Dark
+    Material.accent: "#FFFFFF"
+    Material.foreground: "#FFFFFF"
+    Material.background: "#000000"
     Item {
         id: devices
         property string name
@@ -25,44 +31,80 @@ ApplicationWindow {
     property bool connected: false
     property bool transferring: false
     property bool displayOptions: false
+    property bool autoQueue
+    property bool logs
+    property alias logText: log.text
     property string devicePlural: devices.total == 1 ? "body camera" : "body cameras"
 
     visible: true
-    width: 320
-    height: 240
+    width: 800
+    height: 480
     title: "Body Cam Interface"
+    //visibility: "FullScreen"
 
     //layout
     Column {
-        
+        topPadding: 5
+        leftPadding: 5
+        spacing: 5
         anchors.horizontalCenter: parent.horizontalCenter
         
         visible: !displayOptions
         width: parent.width
-        Text {
-            text: connected ? `${devices.total} ${devicePlural} ready for transfer.` : `Connect a body camera.`
-            visible: !transferring && !devices.total
+        RowLayout{
+            width: parent.width
+            Column{
+                Layout.alignment: logs ? Qt.AlignRight : Qt.AlignHCenter
+                WText {
+                    text: connected ? `${devices.total} ${devicePlural} ready for transfer.` : `Connect a body camera.`
+                    visible: !transferring
+                }        
+                
+                WText {
+                    id: status
+                    text: "Transferring..."
+                    visible: transferring
+                }
+                ProgressComplex {
+                    
+                    visible: transferring
+                    cameraName: devices.name
+                    cameraCurrent: devices.current
+                    cameraTotal: devices.total
+                    fileName: files.name
+                    fileCurrent: files.current
+                    fileTotal: files.total
+                    bytesCurrent: bytes.current
+                    bytesTotal: bytes.total
+                }
+            }
+            ScrollView {
+                Layout.alignment: Qt.AlignRight
+                visible: logs
+                id: view
+                implicitWidth: 300
+                implicitHeight: 300
+                rightPadding: 20
+                clip: true
+
+                TextArea {
+                    id: log
+                    text: ""
+                    color: "#FFFFFF"
+                    font.pointSize: 12
+                    readOnly: true
+                    wrapMode: TextEdit.Wrap
+                    activeFocusOnPress: false
+                    textMargin: 6
+                    background: Rectangle {
+                        border.width: 4
+                        color: "#000000"
+                        border.color: "#111111"
+                    }
+                }
+            }
         }
-        Text {
-            text: "Connect a camera to begin."
-            visible: !transferring && devices.total
-        }
-        Text {
-            id: status
-            text: "Transferring..."
-            visible: transferring
-        }
-        ProgressComplex {
-            visible: transferring
-            cameraName: devices.name
-            cameraCurrent: devices.current
-            cameraTotal: devices.total
-            fileName: files.name
-            fileCurrent: files.current
-            fileTotal: files.total
-            bytesCurrent: bytes.current
-            bytesTotal: bytes.total
-        }
+
         Row {
             spacing: 5
             anchors.horizontalCenter: parent.horizontalCenter
@@ -75,44 +117,12 @@ ApplicationWindow {
                 text: transferring ? "Stop" : "Options"
             }
         }
-    }
-    Column{
-        spacing: 5
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width
-        visible: displayOptions
-        Row {
-            spacing: 5
-            anchors.horizontalCenter: parent.horizontalCenter
-            Button {
-                width: 20
-                height: 20
-                id: back
-                text: "<"
-            }
-            Text {
-                text: "Options"
-            }
-        }
-        
-        ScrollView {
-            anchors.horizontalCenter: parent.horizontalCenter
-            id: scroller
-            
-            height: 300
-            width: 200
-            clip : true
 
-            GridLayout{
-                columns: 2
-                Button {
-                    text: "Shutdown"
-                }
-                Button {
-                    text: "Restart"
-                }
-            }
-        }
+    }
+    Loader{
+        source: "options.qml"
+        visible: displayOptions
+        anchors.horizontalCenter: parent.horizontalCenter
     }
 
     Timer {
@@ -151,12 +161,7 @@ ApplicationWindow {
             }
         }
     }
-    Connections {
-        target: back
-        function onClicked(){
-            displayOptions = false
-        }
-    }
+
     function transferTest(){
         if(timer.i >= devices.total) {
             transferring = false

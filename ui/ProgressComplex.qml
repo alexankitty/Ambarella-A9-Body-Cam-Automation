@@ -15,72 +15,102 @@ Item {
     objectName: "ProgressComplex"
     height: childrenRect.height
     width: childrenRect.width
-    anchors.horizontalCenter: parent.horizontalCenter
     ColumnLayout{
-        Text {
-            id: bodyCamText
-            text: `Name: ${cameraName}`
+        
+        RowLayout{
+            WText {
+                text: `Name:`
+            }
+            WText {
+                rightPadding: 15
+                Layout.fillWidth: true
+                horizontalAlignment: WText.AlignRight
+                text: `${cameraName}`
+            }
         }
 
-        Text {
-            id: bodyCamProgInfo
-            text: `Completed: ${cameraCurrent} / ${cameraTotal} `
+        RowLayout{
+            WText{
+                text: "Completed"
+            }
+            WText{
+                rightPadding: 15
+                Layout.fillWidth: true
+                horizontalAlignment: WText.AlignRight
+                text: `${cameraCurrent} / ${cameraTotal}`
+            }
         }
 
         RowLayout {
+            Layout.alignment: Qt.AlignHCenter
             ProgressBar {
                 id: bodyCamProgress
                 value: cameraCurrent / cameraTotal
             }
-            Text {
+            WText {
                 text: `${Math.floor((cameraCurrent / cameraTotal) * 100)}%`
             }
         }
         
-
-        Text {
-            id: fileNameText
-            text: `Filename: ${fileName}`
-        }
-
-        Text {
-            id: fileNameProgInfo
-            text: `Files: ${fileCurrent} / ${fileTotal}`
+        RowLayout{
+            WText{
+                text: "Filename:"
+            }
+            WText{
+                rightPadding: 15
+                Layout.fillWidth: true
+                horizontalAlignment: WText.AlignRight
+                text: `${fileName}`
+            }
         }
 
         RowLayout{
+            WText{
+                text: "Files:"
+            }
+            WText{
+                rightPadding: 15
+                Layout.fillWidth: true
+                horizontalAlignment: WText.AlignRight
+                text: `${fileCurrent} / ${fileTotal}`
+            }
+        }
+
+        RowLayout{
+            Layout.alignment: Qt.AlignHCenter
             ProgressBar {
                 id: fileNameProgress
                 value: fileCurrent / fileTotal
             }
-            Text {
+            WText {
                 text: `${Math.floor((fileCurrent / fileTotal) * 100)}%`
             }
         }
 
         RowLayout {
-            Text {
+            WText {
                 text: "Bytes: Transferred: "
             }
-            Text {
-                horizontalAlignment: Text.AlignRight
+            WText {
+                horizontalAlignment: WText.AlignRight
                 Layout.preferredWidth: 63
                 text: `${readableByteCount(bytesCurrent)}`
             }
-            Text {
+            WText {
                 text: "/"
             }
-            Text {
+            WText {
                 Layout.preferredWidth: 63
                 text: `${readableByteCount(bytesTotal)}`
             }
         }
         RowLayout {
+            Layout.alignment: Qt.AlignHCenter
             ProgressBar {
                 id: bytesProgres
                 value: bytesCurrent / bytesTotal
             }
-            Text {
+            WText {
                 text: `${Math.floor((bytesCurrent / bytesTotal) * 100)}%`
             }
         }

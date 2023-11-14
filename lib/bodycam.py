@@ -1,43 +1,54 @@
 import usb.core
 import usb.util
 import usb.control
-import sys
 
 packetLen = 10
 usbIn = 0xc0
 usbOut = 0x40
 
-def connectAll():
-    # find our device
+# Get all devices connected to the syhstem matching 0x4255 0x0001
+def getDevices():
     devGen = usb.core.find(idVendor=0x4255, idProduct=0x0001, find_all=True)
-
-    # was it found?
     if devGen is None:
         raise ValueError('Device not found')
-    # set the active configuration. With no arguments, the first
-    # configuration will be the active one
-    x = 0
-    devList = [None] * 0
+    devList = [None] * 0    
     for dev in devGen:
-        x += 1
-        dev.set_configuration()
-
-        # get an endpoint instance
-        cfg = dev.get_active_configuration()
-        intf = cfg[(0,0)]
-
-        ep = usb.util.find_descriptor(
-            intf,
-            # match the first OUT endpoint
-            custom_match = \
-            lambda e: \
-                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                usb.util.ENDPOINT_OUT)
-
-        assert ep is not None
         devList.append(dev)
+    return devList
+
+# Get number of devices not in USB mode
+def getDeviceCount():
+    devList = getDevices()
+    x = 0
+    for dev in devList:
+        x += 1
+    return x
+
+# Connect USB Mode for all devices in a list, Params: devList: generator of devices
+def connectAll(devList):
+    x = 0
+    for dev in devList:
+        x += 1
+        connect(dev) 
     print(f"Connection succeeded. {x} device{'s were' if not x == 1 else ' was'} connected.")
     return devList #give us our device iterator instance
+
+# Connect USB Mode, Params: dev: deviceInstance
+def connect(dev):
+    dev.set_configuration()
+    # get an endpoint instance
+    cfg = dev.get_active_configuration()
+    intf = cfg[(0,0)]
+
+    ep = usb.util.find_descriptor(
+        intf,
+        # match the first OUT endpoint
+        custom_match = \
+        lambda e: \
+            usb.util.endpoint_direction(e.bEndpointAddress) == \
+            usb.util.ENDPOINT_OUT)
+
+    assert ep is not None
 
 # Check password and log in. Params: dev: deviceInstance pw: string
 def login(dev, pw):
@@ -61,13 +72,15 @@ def enableDiskMode(dev):
     ret = dev.ctrl_transfer(usbIn, 85, 0x0080, 0, packetLen)
     print("Disk mode enabled, enjoy :)")
 
-#read pw from file
-f = open("pw", "r")
-pw = f.read().strip()
-f.close()
-devList = connectAll()
-for dev in devList:
-    if login(dev, pw):
-        enableDiskMode(dev)
+# Boiler plate code for connecting all devices and can be reused somewhere else
+if __name__ == "__main__":
+    #read pw from file
+    f = open("pw", "r")
+    pw = f.read().strip()
+    f.close()
+    devList = connectAll()
+    for dev in devList:
+        if login(dev, pw):
+            enableDiskMode(dev)
 
 

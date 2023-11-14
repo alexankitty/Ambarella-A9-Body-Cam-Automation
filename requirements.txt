@@ -1,3 +1,5 @@
 geopy
 pyusb
 pyqt5
+pyudev
+glib

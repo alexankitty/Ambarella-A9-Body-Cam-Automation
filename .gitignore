@@ -2,3 +2,5 @@ pw
 mount/*
 sambaCreds
 googleApiKey
+__pycache__
+settings.json
